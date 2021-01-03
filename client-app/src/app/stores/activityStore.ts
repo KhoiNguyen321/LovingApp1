@@ -39,6 +39,31 @@ class ActivityStore {
     }
   };
 
+  @action loadActivity = async (id:string) => {
+    let activity = this.getActivity(id);
+    if(activity){
+      this.selectedActivity = activity;
+    } else {
+      this.loadingInitial = true;
+      try{
+        activity = await agent.Activities.details(id);
+        runInAction('getting activity',() => {
+            this.selectedActivity = activity;
+            this.loadingInitial = false;
+        })
+      }catch (error){
+        runInAction('get activity error', () => {
+          this.loadingInitial = false;
+        })
+        console.log(error);
+      }
+    }
+  }
+
+  getActivity = (id:string) => {
+    return this.activityRegistry.get(id);
+  }
+
   @action createActivity = async (activity: IActivity) => {
     this.submitting = true;
     try {
